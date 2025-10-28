@@ -1,0 +1,595 @@
+from tkinter import Tk
+import tempfile
+from tkinter import *
+from tkinter import messagebox  # needed for messagebox.showerror function
+import random  # generate bill number randomly
+import os
+import subprocess
+import tkinter as tk
+import smtplib
+from tkinter import Tk, Toplevel, Label, LabelFrame, Entry, Text, Button
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+
+
+def clear():
+    lambdonerEntry.delete(0, END)
+    chickendonerEntry.delete(0, END)
+    lambshishEntry.delete(0, END)
+    chickenshishEntry.delete(0, END)
+    mixdonerEntry.delete(0, END)
+    mixshishEntry.delete(0, END)
+
+    lambdonerEntry.insert(0, 0)
+    chickendonerEntry.insert(0, 0)
+    lambshishEntry.insert(0, 0)
+    chickenshishEntry.insert(0, 0)
+    mixdonerEntry.insert(0, 0)
+    mixshishEntry.insert(0, 0)
+
+    friesEntry.delete(0, END)
+    onionringsEntry.delete(0, END)
+    riceEntry.delete(0, END)
+    mixsaladEntry.delete(0, END)
+    coleslawEntry.delete(0, END)
+    hummusEntry.delete(0, END)
+
+    friesEntry.insert(0, 0)
+    onionringsEntry.insert(0, 0)
+    riceEntry.insert(0, 0)
+    mixsaladEntry.insert(0, 0)
+    coleslawEntry.insert(0, 0)
+    hummusEntry.insert(0, 0)
+
+    candrinkEntry.delete(0, END)
+    bottledrinkpriceEntry.delete(0, END)
+    redbullEntry.delete(0, END)
+    chiliEntry.delete(0, END)
+    garlicEntry.delete(0, END)
+    tahiniEntry.delete(0, END)
+
+    candrinkEntry.insert(0, 0)
+    bottledrinkpriceEntry.insert(0, 0)
+    redbullEntry.insert(0, 0)
+    chiliEntry.insert(0, 0)
+    garlicEntry.insert(0, 0)
+    tahiniEntry.insert(0, 0)
+
+    mainstaxEntry.delete(0, END)
+    sidestaxEntry.delete(0, END)
+    drinkstaxEntry.delete(0, END)
+
+    mainstotalEntry.delete(0, END)
+    sidestotalEntry.delete(0, END)
+    drinksandextras_totalEntry.delete(0, END)
+
+    employeeNameEntry.delete(0, END)
+    phoneEntry.delete(0, END)
+    billnumberEntry.delete(0, END)
+
+    textarea.delete(1.0,END)
+
+
+def send_email():
+    def send_email():
+        try:
+            ob=smtplib.SMTP('smtp.gmail.com',587)
+            ob.starttls()
+            ob.login(senderEntry.get(),passwordEntry.get())
+            message=email_textarea.get(1.0,END)
+            ob.sendmail(senderEntry.get(),recipientEntry.get(),message)
+            ob.quit()
+            messagebox.showinfo('Success','Order Summary successfully sent',parent=root1)
+        except:
+            messagebox.showinfo('Error', 'Something went wrong, please try again',parent=root1)
+
+    if textarea.get(1.0, END).strip() == '':
+        messagebox.showerror('Error', 'Bill is empty')
+    else:
+        root1=Toplevel()
+        root1.title('Send Email')
+        root1.config(bg='gray20')
+
+        senderFrame=LabelFrame(root1,text='Sender',font=('arial',16,'bold'),bd=6,bg='gray20',fg='white')
+        senderFrame.grid(row=0,column=0,padx=40,pady=20)
+
+        senderLabel=Label(senderFrame,text="Sender's Email",font=('arial',14,'bold',),bg='gray20',fg='white')
+        senderLabel.grid(row=0,column=0,padx=10,pady=8)
+
+        senderEntry=Entry(senderFrame,font=('arial',14,'bold'),bd=2,width=23,relief=RIDGE)
+        senderEntry.grid(row=0,column=1,padx=10,pady=8)
+
+        passwordLabel = Label(senderFrame, text="Password", font=('arial', 14, 'bold',), bg='gray20', fg='white')
+        passwordLabel.grid(row=1, column=0, padx=10, pady=8)
+
+        passwordEntry = Entry(senderFrame, font=('arial', 14, 'bold'), bd=2, width=23, relief=RIDGE,show='*')
+        passwordEntry.grid(row=1, column=1, padx=10, pady=8)
+
+        recipientFrame = LabelFrame(root1, text='Recipient', font=('arial', 16, 'bold'), bd=6, bg='gray20', fg='white')
+        recipientFrame.grid(row=1, column=0, padx=40, pady=20)
+
+        recipientLabel = Label(recipientFrame, text="Email Address", font=('arial', 14, 'bold'), bg='gray20', fg='white')
+        recipientLabel.grid(row=0, column=0, padx=10, pady=8)
+
+        recipientEntry = Entry(recipientFrame, font=('arial', 14, 'bold'), bd=2, width=23, relief=RIDGE)
+        recipientEntry.grid(row=0, column=1, padx=10, pady=8)
+
+        messageLabel = Label(recipientFrame, text="Message", font=('arial', 14, 'bold'), bg='gray20', fg='white')
+        messageLabel.grid(row=1, column=0, padx=10, pady=8)
+
+        email_textarea=Text(recipientFrame,font=('arial', 14, 'bold'),bd=2,relief=SUNKEN,width=50,height=20)
+        email_textarea.grid(row=2,column=0,columnspan=2)
+        email_textarea.delete(1.0,END) # so repeated content is not present
+        email_textarea.insert(END,textarea.get(1.0,END).replace('=','').replace('-','').replace('\t\t\t','\t\t'))
+
+        sendButton=Button(root1,text='Send',font=('arial',16,'bold'),width=15,command=send_email)
+        sendButton.grid(row=2,column=0,pady=20)
+
+
+    root1.mainloop()
+
+
+
+def print_bill():
+    if textarea.get(1.0, END).strip() == '':
+        messagebox.showerror('Error', 'Bill is empty')
+    else:
+        file = tempfile.mktemp('.txt')
+        with open(file, 'w') as f:
+            f.write(textarea.get(1.0, END).strip())
+        try:
+            subprocess.run(['open', '-a', 'TextEdit', file], check=True)
+        except subprocess.CalledProcessError:
+            messagebox.showerror('Error', 'Failed to open the file for printing')
+
+
+def search_bill():
+    target_bill_number = billnumberEntry.get().strip()
+
+    for i in os.listdir('bills/'):
+        if i.split('.')[0].strip() == target_bill_number:
+            f = open(f'bills/{i}', 'r')
+            textarea.delete(1.0, END)
+            for data in f:
+                textarea.insert(END, data)
+            f.close()
+            break
+    else:
+        messagebox.showerror('Error', 'Invalid Bill Number')
+
+
+def save_bill():
+    global billnumber
+    result = messagebox.askyesno('Confirm', 'Would you like to save the bill ?')
+    if result:
+        bill_content = textarea.get(1.0, END)
+        file = open(f'bills/ {billnumber}.txt', 'w')
+        file.write(bill_content)
+        file.close()
+        messagebox.showinfo('Succesful', f'order {billnumber} is saved successfully')
+        billnumber = random.randint(1, 1000)
+
+billnumber = random.randint(1, 1000)
+#bill number added twice in the case that another customer order the same items
+
+
+
+def bill_area():
+    if employeeNameEntry.get() == '' or phoneEntry.get() == '':
+        messagebox.showerror('Error','Customer details not entered')  # error notification for not entering employeeName or phone details
+    elif mainstotalEntry.get() == '' or sidestotalEntry.get() == '' or drinksandextras_totalEntry.get() == '':
+        messagebox.showerror('Error', 'No items selected')  # error notification for not selecting items
+    elif mainstotalEntry.get() == '0 Gbp' and sidestotalEntry.get() == '0 Gbp' and drinksandextras_totalEntry.get() == '0 Gbp':
+        messagebox.showerror('Error', 'No items selected')
+    else:  # order summary text display
+        textarea.delete(1.0, END)
+        textarea.insert(END, '\t\t*** Welcome Customer ! ***\n')
+        textarea.insert(END, f'\nBill Number: {billnumber}\n')
+        textarea.insert(END, f'\nCustomer employeeName: {employeeNameEntry.get()}\n')
+        textarea.insert(END, f'\nCustomer Phone Number: {phoneEntry.get()}\n')
+        textarea.insert(END, '\n==================================================')
+        textarea.insert(END, 'Product\t\tQuantity\t\t\tPrice')
+        textarea.insert(END, '\n==================================================')
+        if lambdonerEntry.get() != '0':
+            textarea.insert(END, f'\nLamb Doner\t\t{lambdonerEntry.get()}\t\t{lambdonerprice} Gbp')
+        if chickendonerEntry.get() != '0':
+            textarea.insert(END, f'\nChicken Doner\t\t{chickendonerEntry.get()}\t\t{chickendonerprice} Gbp')
+        if lambshishEntry.get() != '0':
+            textarea.insert(END, f'\nLamb Shish\t\t{lambshishEntry.get()}\t\t{lambshishprice} Gbp')
+        if chickenshishEntry.get() != '0':
+            textarea.insert(END, f'\nChicken Shish\t\t{chickenshishEntry.get()}\t\t{chickenshishprice} Gbp')
+        if mixdonerEntry.get() != '0':
+            textarea.insert(END, f'\nMix Doner\t\t{mixdonerEntry.get()}\t\t{mixdonerprice} Gbp')
+        if mixshishEntry.get() != '0':
+            textarea.insert(END, f'\nMix Shish\t\t{mixshishEntry.get()}\t\t{mixshishprice} Gbp')
+
+        if friesEntry.get() != '0':
+            textarea.insert(END, f'\nFries\t\t{friesEntry.get()}\t\t{friesprice} Gbp')
+        if onionringsEntry.get() != '0':
+            textarea.insert(END, f'\nOnion Rings\t\t{onionringsEntry.get()}\t\t{onionringsprice} Gbp')
+        if riceEntry.get() != '0':
+            textarea.insert(END, f'\nRice\t\t{riceEntry.get()}\t\t{riceprice} Gbp')
+        if mixsaladEntry.get() != '0':
+            textarea.insert(END, f'\nMixed Salad\t\t{mixsaladEntry.get()}\t\t{mixsaladEntry} Gbp')
+        if coleslawEntry.get() != '0':
+            textarea.insert(END, f'\nColeslaw\t\t{coleslawEntry.get()}\t\t{coleslawprice} Gbp')
+        if hummusEntry.get() != '0':
+            textarea.insert(END, f'\nHummus\t\t{hummusEntry.get()}\t\t{hummusprice} Gbp')
+
+        if candrinkEntry.get() != '0':
+            textarea.insert(END, f'\nCan Drink\t\t{candrinkEntry.get()}\t\t{candrinkprice} Gbp')
+        if bottledrinkpriceEntry.get() != '0':
+            textarea.insert(END, f'\nBottle Drink\t\t{bottledrinkpriceEntry.get()}\t\t{bottledrinkprice} Gbp')
+        if redbullEntry.get() != '0':
+            textarea.insert(END, f'\nRedbull\t\t{redbullEntry.get()}\t\t{redbullprice} Gbp')
+        if chiliEntry.get() != '0':
+            textarea.insert(END, f'\nChili Sauce\t\t{chiliEntry.get()}\t\t{chiliprice} Gbp')
+        if garlicEntry.get() != '0':
+            textarea.insert(END, f'\nGarlic\t\t{garlicEntry.get()}\t\t{garlicprice} Gbp')
+        if tahiniEntry.get() != '0':
+            textarea.insert(END, f'\nTahini\t\t{tahiniEntry.get()}\t\t{tahiniprice} Gbp')
+        textarea.insert(END, '\n--------------------------------------------------')
+
+        if mainstaxEntry.get() != '0.0 Gbp':
+            textarea.insert(END, f'\nMains Tax\t\t\t\t{mainstaxEntry.get()}')
+        if sidestaxEntry.get() != '0.0 Gbp':
+            textarea.insert(END, f'\nSides Tax\t\t\t\t{sidestaxEntry.get()}')
+        if drinkstaxEntry.get() != '0.0 Gbp':
+            textarea.insert(END, f'\nDrinks & Extras Tax\t\t\t\t{drinkstaxEntry.get()}')
+        textarea.insert(END, f'\n\nTotal Bill \t\t\t\t{totalbill} Gbp')
+        textarea.insert(END,f'\nThank you for ordering with us!')
+        save_bill()
+
+
+def total():
+    global lambdonerprice, chickendonerprice, lambshishprice, chickenshishprice, mixdonerprice, mixshishprice
+    global friesprice, onionringsprice, riceprice, mixedsaladprice, coleslawprice, hummusprice
+    global candrinkprice, bottledrinkprice, redbullprice, chiliprice, garlicprice, tahiniprice
+    global totalmainsprice, totalsidesprice, totaldrinksprice, mainstax, sidestax, drinkstax
+    global totalbill
+
+    # mains price calculator
+    lambdonerprice = round(int(lambdonerEntry.get()) * 9.49)
+    chickendonerprice = round(int(chickendonerEntry.get()) * 8.49)
+    lambshishprice = round(int(lambshishEntry.get()) * 10.99)
+    chickenshishprice = round(int(chickenshishEntry.get()) * 9.99)
+    mixdonerprice = round(int(mixdonerEntry.get()) * 15.49)
+    mixshishprice = round(int(mixshishEntry.get()) * 16.49)
+
+    totalmainsprice = round(
+    lambdonerprice + chickendonerprice + lambshishprice + chickenshishprice + mixdonerprice + mixshishprice,2)  # adds total of all mains 2.dp
+    mainstotalEntry.delete(0, END)  # fixes problem of total prices appearing back2back
+    mainstotalEntry.insert(0, f'{totalmainsprice} Gbp')
+    mainstax = round(totalmainsprice * 0.2, 2)  # V.A.T 2.dp
+    mainstaxEntry.delete(0, END)  # fixes problem of total tax appearing back2back
+    mainstaxEntry.insert(0, str(mainstax) + ' Gbp')
+
+    # sides price calculator
+    friesprice = round(int(friesEntry.get()),2) * 2.99
+    onionringsprice = round(int(onionringsEntry.get()),2) * 3.99
+    riceprice = round(int(riceEntry.get()),2) * 2.99
+    mixsaladprice = round(int(mixsaladEntry.get()),2) * 3
+    coleslawprice = round(int(coleslawEntry.get()),2) * 2
+    hummusprice = round(int(hummusEntry.get()),2) * 2
+
+    totalsidesprice = round(friesprice + onionringsprice + riceprice + mixsaladprice + coleslawprice + hummusprice,2)  # adds total of all sides 2.dp
+    sidestotalEntry.delete(0, END)  # fixes problem of total prices appearing back2back
+    sidestotalEntry.insert(0, f'{totalsidesprice} Gbp')
+    sidestax = round(totalsidesprice * 0.2,2)  # V.A.T 2.dp
+    sidestaxEntry.delete(0, END)  # fixes problem of total tax appearing back2back
+    sidestaxEntry.insert(0, str(sidestax) + ' Gbp')
+
+    # drinks price calculator
+    candrinkprice = round(int(candrinkEntry.get()) * 1.40,2)
+    bottledrinkprice = round((int(bottledrinkpriceEntry.get())) * 3.20,2)
+    redbullprice = round(int(redbullEntry.get()),2) * 2.20
+    chiliprice = round(int(chiliEntry.get()),2) * 0.50
+    garlicprice = round(int(garlicEntry.get()),2) * 2.99
+    tahiniprice = round(int(tahiniEntry.get()),2) * 0.50
+
+    totaldrinksprice = round(candrinkprice + bottledrinkprice + redbullprice + chiliprice + garlicprice + tahiniprice,2)  # adds total of all sides 2.dp
+    drinksandextras_totalEntry.delete(0, END)  # fixes problem of total prices appearing back2back
+    drinksandextras_totalEntry.insert(0, f'{totaldrinksprice} Gbp')
+    drinkstax = round(totaldrinksprice * 0.2,2)  # V.A.T 2.dp
+    drinkstaxEntry.delete(0,END)  # fixes problem of total tax appearing back2back #
+    drinkstaxEntry.insert(0,str(drinkstax) + ' Gbp')#
+
+    totalbill = round(totalmainsprice + totalsidesprice + totaldrinksprice + mainstax + sidestax + drinkstax,2)
+
+
+# User Interface Code : #############################################################################################################################
+root = Tk()
+root.title('Online Ordering System')  # header
+root.geometry('1275x750')  # size of app
+# root.iconbitmap('App_Logo') #app icon
+
+headingLabel = Label(root, text='Online Ordering System', font=('helvetica', 30, 'bold'), bg='gray20', fg='gold', bd=12,relief=GROOVE)
+headingLabel.pack(fill=X)
+
+customer_details_frame = LabelFrame(root, text='Customer Details', font=('helevatica', 15, 'bold'), fg='gold', bd=8,relief=GROOVE, bg='gray20')
+customer_details_frame.pack(fill=X, pady=10)
+
+# employeeName box
+employeeNameLabel = Label(customer_details_frame, text='employeeName', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+employeeNameLabel.grid(row=0, column=0, padx=20, )
+# employeeName input box
+employeeNameEntry = Entry(customer_details_frame, font=('arial', 15,), bd=7, width=18)
+employeeNameEntry.grid(row=0, column=1, padx=8)
+
+# phone number box
+phoneLabel = Label(customer_details_frame, text='Phone Number', font=('helevatica', 15, 'bold',), bg='gray20',fg='white')
+phoneLabel.grid(row=0, column=2, padx=20, pady=2)
+# phone number input box
+phoneEntry = Entry(customer_details_frame, font=('arial', 15,), bd=7, width=18)
+phoneEntry.grid(row=0, column=3, padx=8)
+
+# bill number box
+billnumberLabel = Label(customer_details_frame, text='Order No.', font=('helevatica', 15, 'bold',), bg='gray20',fg='white')
+billnumberLabel.grid(row=0, column=4, padx=20, pady=2)
+# order-no input box
+billnumberEntry = Entry(customer_details_frame, font=('arial', 15,), bd=7, width=18)
+billnumberEntry.grid(row=0, column=5, padx=8)
+
+# search-button (top right)
+searchButton = Button(customer_details_frame, text='Search', font=('helevatica', 15, 'bold'), bg='gray20', bd=9,relief=GROOVE,command=search_bill)
+searchButton.grid(row=0, column=6, padx=90, pady=10)
+
+# item selection frame (middle)
+itemsFrame = Frame(root)
+itemsFrame.pack(pady=10)
+
+########################################################################################################################################
+
+# mains box (middle left)
+mainsFrame = LabelFrame(itemsFrame, text='Mains', font=('helevatica', 15, 'bold'), fg='gold', bd=8, relief=GROOVE,bg='gray20')
+mainsFrame.grid(row=0, column=0)
+
+# items under 'mains' catergory
+
+# main 1 = 'lamb doner'
+lambdonerLabel = Label(mainsFrame, text='Lamb Doner', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+lambdonerLabel.grid(row=0, column=0, pady=9, padx=10, sticky='w')
+
+lambdonerEntry = Entry(mainsFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+lambdonerEntry.grid(row=0, column=1, pady=9, padx=10, sticky='w')
+lambdonerEntry.insert(0, 0)
+
+# main 2 = 'chicken doner'
+chickendonerLabel = Label(mainsFrame, text='Chicken Doner', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+chickendonerLabel.grid(row=1, column=0, pady=9, padx=10, sticky='w')
+
+chickendonerEntry = Entry(mainsFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+chickendonerEntry.grid(row=1, column=1, pady=9, padx=10, sticky='w')
+chickendonerEntry.insert(0, 0)
+
+# main 3 = 'lamb shish'
+lambshishLabel = Label(mainsFrame, text='Lamb Shish', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+lambshishLabel.grid(row=2, column=0, pady=9, padx=10, sticky='w')
+
+lambshishEntry = Entry(mainsFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+lambshishEntry.grid(row=2, column=1, pady=9, padx=10, sticky='w')
+lambshishEntry.insert(0, 0)
+
+# main 4 = 'chicken shish'
+chickenshishLabel = Label(mainsFrame, text='Chicken Shish', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+chickenshishLabel.grid(row=3, column=0, pady=9, padx=10, sticky='w')
+
+chickenshishEntry = Entry(mainsFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+chickenshishEntry.grid(row=3, column=1, pady=9, padx=10, sticky='w')
+chickenshishEntry.insert(0, 0)
+
+# main 5 = 'mix doner'
+mixdonerLabel = Label(mainsFrame, text='Mix Doner', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+mixdonerLabel.grid(row=4, column=0, pady=9, padx=10, sticky='w')
+
+mixdonerEntry = Entry(mainsFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+mixdonerEntry.grid(row=4, column=1, pady=9, padx=10, sticky='w')
+mixdonerEntry.insert(0, 0)
+
+# main 6 = 'mix shish'
+mixshishLabel = Label(mainsFrame, text='Mix Shish', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+mixshishLabel.grid(row=5, column=0, pady=9, padx=10, sticky='w')
+
+mixshishEntry = Entry(mainsFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+mixshishEntry.grid(row=5, column=1, pady=9, padx=10, sticky='w')
+mixshishEntry.insert(0, 0)
+
+########################################################################################################################################
+
+# sides box (middle)
+sidesFrame = LabelFrame(itemsFrame, text='Sides', font=('helevatica', 15, 'bold'), fg='gold', bd=8, relief=GROOVE,bg='gray20')
+sidesFrame.grid(row=0, column=1)
+
+# items under 'sides' catergory
+
+# side 1  = 'Fries'
+friesLabel = Label(sidesFrame, text='Fries', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+friesLabel.grid(row=0, column=0, pady=9, padx=10, sticky='w')
+
+friesEntry = Entry(sidesFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+friesEntry.grid(row=0, column=1, pady=9, padx=10, sticky='w')
+friesEntry.insert(0, 0)
+
+# side 2  = 'Onion Rings'
+onionringsLabel = Label(sidesFrame, text='Onion Rings', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+onionringsLabel.grid(row=1, column=0, pady=9, padx=10, sticky='w')
+
+onionringsEntry = Entry(sidesFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+onionringsEntry.grid(row=1, column=1, pady=9, padx=10, sticky='w')
+onionringsEntry.insert(0, 0)
+
+# side 3  = 'Rice'
+riceLabel = Label(sidesFrame, text='Rice', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+riceLabel.grid(row=2, column=0, pady=9, padx=10, sticky='w')
+
+riceEntry = Entry(sidesFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+riceEntry.grid(row=2, column=1, pady=9, padx=10, sticky='w')
+riceEntry.insert(0, 0)
+
+# side 4  = 'Mix Salad'
+mixsaladLabel = Label(sidesFrame, text='Mixed Salad', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+mixsaladLabel.grid(row=3, column=0, pady=9, padx=10, sticky='w')
+
+mixsaladEntry = Entry(sidesFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+mixsaladEntry.grid(row=3, column=1, pady=9, padx=10, sticky='w')
+mixsaladEntry.insert(0, 0)
+
+# side 5  = 'Coleslaw'
+coleslawLabel = Label(sidesFrame, text='Coleslaw', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+coleslawLabel.grid(row=4, column=0, pady=9, padx=10, sticky='w')
+
+coleslawEntry = Entry(sidesFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+coleslawEntry.grid(row=4, column=1, pady=9, padx=10, sticky='w')
+coleslawEntry.insert(0, 0)
+
+# side 6  = 'Hummus'
+hummusLabel = Label(sidesFrame, text='Hummus', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+hummusLabel.grid(row=5, column=0, pady=9, padx=10, sticky='w')
+
+hummusEntry = Entry(sidesFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+hummusEntry.grid(row=5, column=1, pady=9, padx=10, sticky='w')
+hummusEntry.insert(0, 0)
+
+########################################################################################################################################
+
+# items under 'drinks&extras' catergory
+# drinks&extras box (middle - right)
+drinksFrame = LabelFrame(itemsFrame, text='Drinks & Extras', font=('helevatica', 15, 'bold'), fg='gold', bd=8,relief=GROOVE, bg='gray20')
+drinksFrame.grid(row=0, column=2)
+
+# drink 1  = 'Can Drink'
+candrinkLabel = Label(drinksFrame, text='Can Drink', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+candrinkLabel.grid(row=0, column=0, pady=9, padx=10, sticky='w')
+
+candrinkEntry = Entry(drinksFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+candrinkEntry.grid(row=0, column=1, pady=9, padx=10, sticky='w')
+candrinkEntry.insert(0, 0)
+
+# drink 2  = 'Bottle Drink'
+bottledrinkLabel = Label(drinksFrame, text='Bottle Drink', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+bottledrinkLabel.grid(row=1, column=0, pady=9, padx=10, sticky='w')
+
+bottledrinkpriceEntry = Entry(drinksFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+bottledrinkpriceEntry.grid(row=1, column=1, pady=9, padx=10, sticky='w')
+bottledrinkpriceEntry.insert(0, 0)
+
+# drink 3  = 'Redbull'
+redbullLabel = Label(drinksFrame, text='Redbull', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+redbullLabel.grid(row=2, column=0, pady=9, padx=10, sticky='w')
+
+redbullEntry = Entry(drinksFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+redbullEntry.grid(row=2, column=1, pady=9, padx=10, sticky='w')
+redbullEntry.insert(0, 0)
+
+# extra 1 (drinks&extras) = 'Chili Sauce'
+chiliLabel = Label(drinksFrame, text='Chili Sauce', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+chiliLabel.grid(row=3, column=0, pady=9, padx=10, sticky='w')
+
+chiliEntry = Entry(drinksFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+chiliEntry.grid(row=3, column=1, pady=9, padx=10, sticky='w')
+chiliEntry.insert(0, 0)
+
+# extra 2 (drinks&extras) = 'Garlic Sauce'
+garlicLabel = Label(drinksFrame, text='Garlic Sauce', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+garlicLabel.grid(row=4, column=0, pady=9, padx=10, sticky='w')
+
+garlicEntry = Entry(drinksFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+garlicEntry.grid(row=4, column=1, pady=9, padx=10, sticky='w')
+garlicEntry.insert(0, 0)
+
+# extra 3 (drinks&extras) = 'Tahini'
+tahiniLabel = Label(drinksFrame, text='Tahini', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+tahiniLabel.grid(row=5, column=0, pady=9, padx=10, sticky='w')
+
+tahiniEntry = Entry(drinksFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+tahiniEntry.grid(row=5, column=1, pady=9, padx=10, sticky='w')
+tahiniEntry.insert(0, 0)
+
+#######################################################################################################################################
+
+# order summary box
+ordersummaryframe = Frame(itemsFrame,bd=8,relief=GROOVE)
+ordersummaryframe.grid(row=0, column=3, padx=10)
+
+ordersummaryareaLabel = Label(ordersummaryframe, text='Order Summary', font=('helevatica', 15, 'bold',), bd=6,relief=GROOVE)
+ordersummaryareaLabel.pack(fill=X)
+
+scrollbar = Scrollbar(ordersummaryframe, orient=VERTICAL)  # position and orientation of the scroll bar
+scrollbar.pack(side=RIGHT, fill=Y)
+textarea = Text(ordersummaryframe, height=22, width=50, yscrollcommand=scrollbar.set)
+textarea.pack()
+scrollbar.config(command=textarea.yview)  # configuring scroll bar to y-axis
+
+###############################################################################################################################
+
+# Total Menu Frame
+totalmenuFrame = LabelFrame(root, text='Totals Menu', font=('helevatica', 15, 'bold'), fg='gold', bd=8, relief=GROOVE,bg='gray20')
+totalmenuFrame.pack()
+
+# totals menu 1   = 'Mains Total'
+mainstotalLabel = Label(totalmenuFrame, text='Mains Total', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+mainstotalLabel.grid(row=0, column=0, pady=9, padx=10, sticky='w')
+
+mainstotalEntry = Entry(totalmenuFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+mainstotalEntry.grid(row=0, column=1, pady=9, padx=10, )
+
+# totals menu 2   = 'Sides Total'
+sidestotalLabel = Label(totalmenuFrame, text='Sides Total', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+sidestotalLabel.grid(row=1, column=0, pady=9, padx=10, sticky='w')
+
+sidestotalEntry = Entry(totalmenuFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+sidestotalEntry.grid(row=1, column=1, pady=9, padx=10, )
+
+# totals menu 3   = 'Drinks&Extras Total'
+drinksandextrastotalLabel = Label(totalmenuFrame, text='Drinks & Extras Total', font=('helevatica', 15, 'bold',),bg='gray20', fg='white')
+drinksandextrastotalLabel.grid(row=2, column=0, pady=9, padx=10, sticky='w')
+
+drinksandextras_totalEntry = Entry(totalmenuFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+drinksandextras_totalEntry.grid(row=2, column=1, pady=9, padx=10, )
+
+# totals tax 1   = 'Mains Tax'
+mainstaxLabel = Label(totalmenuFrame, text='Mains Tax', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+mainstaxLabel.grid(row=0, column=2, pady=9, padx=10, sticky='w')
+
+mainstaxEntry = Entry(totalmenuFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+mainstaxEntry.grid(row=0, column=3, pady=9, padx=10, )
+
+# totals tax 2   = 'Sides Tax'
+sidestaxLabel = Label(totalmenuFrame, text='Sides Tax', font=('helevatica', 15, 'bold',), bg='gray20', fg='white')
+sidestaxLabel.grid(row=1, column=2, pady=9, padx=10, sticky='w')
+
+sidestaxEntry = Entry(totalmenuFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+sidestaxEntry.grid(row=1, column=3, pady=9, padx=10, )
+
+# totals tax 3   = 'Drinks&Extras Tax'
+drinkstaxLabel = Label(totalmenuFrame, text='Drinks & Extras Tax', font=('helevatica', 15, 'bold',),bg='gray20', fg='white')
+drinkstaxLabel.grid(row=2, column=2, pady=9, padx=10, sticky='w')
+
+drinkstaxEntry = Entry(totalmenuFrame, font=('helevatica', 15, 'bold',), width=10, bd=5, )
+drinkstaxEntry.grid(row=2, column=3, pady=9, padx=10, )
+
+######################################################################################################################################
+
+# buttons on the bottom right
+buttonFrame = Frame(totalmenuFrame, bd=8, relief=GROOVE)
+buttonFrame.grid(row=0, column=4, rowspan=3)
+
+totalButton = Button(buttonFrame, text='Total', font=('arial', 16, 'bold'), bg='gray20', bd=5, width=8, pady=10,command=total)  # assigns to the total subroutine and button
+totalButton.grid(row=0, column=0, pady=20, padx=5)
+
+billButton = Button(buttonFrame, text='Bill', font=('arial', 16, 'bold'), bg='gray20', bd=5, width=8, pady=10,command=bill_area)  # assigns to the bill subroutine and button
+billButton.grid(row=0, column=1, pady=20, padx=5)
+
+send_emailButton = Button(buttonFrame, text='Email', font=('arial', 16, 'bold'), bg='gray20', bd=5, width=8, pady=10,command=send_email)
+send_emailButton.grid(row=0, column=2, pady=20, padx=5)
+
+printButton = Button(buttonFrame, text='Print', font=('arial', 16, 'bold'), bg='gray20', bd=5, width=8, pady=10,command=print_bill)
+printButton.grid(row=0, column=3, pady=20, padx=5)
+
+clearButton = Button(buttonFrame, text='Clear', font=('arial', 16, 'bold'), bg='gray20', bd=5, width=8, pady=10,command=clear)
+clearButton.grid(row=0, column=4, pady=20, padx=5)
+
+root.mainloop()
+
+##############################################################################################################################
